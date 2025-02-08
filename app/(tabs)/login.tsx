@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { Box, Button, Input, Text, VStack } from "native-base";
+import { NativeBaseProvider } from 'native-base';
 
 const Login = () => {
 
@@ -28,35 +29,40 @@ const Login = () => {
     }
 
     return (
-    <Box flex={1} justifyContent="center" alignItems="center" padding={5}>
-      <Text fontSize="2xl" fontWeight="bold" marginBottom={4}>
-        Логин
-      </Text>
-      <VStack space={3} width="90%">
-        <Input 
-          placeholder="Email" 
-          value={email} 
-          onChangeText={setEmail} 
-          variant="outline"
-        />
-        <Input 
-          placeholder="Пароль" 
-          value={password} 
-          onChangeText={setPassword} 
-          type="password" 
-          variant="outline"
-        />
-        <VStack space={2} alignItems="center">
-          <Button variant="outline" colorScheme="primary" onPress={goToRegister}>
-            Нет аккаунта?
-          </Button>
-          <Button colorScheme="success" onPress={login}>
-            Войти
-          </Button>
-        </VStack>
-        {message ? <Text color="gray.500">{message}</Text> : null}
-      </VStack>
-    </Box>
+        <div>
+            <NativeBaseProvider>
+                <Box flex={1} justifyContent="center" alignItems="center" padding={5}>
+                    <Text fontSize="2xl" fontWeight="bold" marginBottom={4}>
+                        Логин
+                    </Text>
+                    <VStack space={3} width="90%">
+                        <Input 
+                        placeholder="Email" 
+                        value={email} 
+                        onChangeText={setEmail} 
+                        variant="outline"
+                        />
+                        <Input 
+                        placeholder="Пароль" 
+                        value={password} 
+                        onChangeText={setPassword} 
+                        type="password" 
+                        variant="outline"
+                        />
+                        <VStack space={2} alignItems="center">
+                        <Button variant="outline" colorScheme="primary" onPress={goToRegister}>
+                            Нет аккаунта?
+                        </Button>
+                        <Button colorScheme="success" onPress={login}>
+                            Войти
+                        </Button>
+                        </VStack>
+                        {message ? <Text color="gray.500">{message}</Text> : null}
+                    </VStack>
+                </Box>
+            </NativeBaseProvider>
+        </div>
+
 )}
 
 export default Login
