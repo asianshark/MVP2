@@ -27,16 +27,8 @@ export default function RootLayout() {
     return null;
   }
 
-  const CustomLightTheme = {
-    ...DefaultTheme,
-    colors: {
-      ...DefaultTheme.colors,
-      background: 'rgb(255, 255, 255)',
-    },
-  };
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : CustomLightTheme}>
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />

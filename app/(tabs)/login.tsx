@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useState } from "react";
 import { Box, Button, Input, Text, VStack } from "native-base";
 import { NativeBaseProvider } from 'native-base';
+import { View } from "react-native";
+
 
 const Login = () => {
 
@@ -29,9 +31,9 @@ const Login = () => {
     }
 
     return (
-        <div>
+        <View style={{ flex: 1, backgroundColor: "white" }}>
             <NativeBaseProvider>
-                <Box flex={1} justifyContent="center" alignItems="center" padding={5}>
+                <Box flex={1} background={'rgb(255, 255, 255)'} justifyContent="center" alignItems="center" padding={5}>
                     <Text fontSize="2xl" fontWeight="bold" marginBottom={4}>
                         Логин
                     </Text>
@@ -61,7 +63,7 @@ const Login = () => {
                     </VStack>
                 </Box>
             </NativeBaseProvider>
-        </div>
+        </View>
 
 )}
 
