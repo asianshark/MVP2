@@ -1,74 +1,172 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import Login from '@/components/login';
+import Reg from '@/components/reg';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { View,StyleSheet, Text, TextInput, ScrollView} from "react-native";
+import { Box, NativeBaseProvider, Button } from "native-base";
+import axios from 'axios';
+import EmissionsChart from '@/components/EmissionsChart';
+import FileUpload from '@/components/FileUpload';
 
 export default function HomeScreen() {
+  const [page, setPage] = useState('')
+  const [date, setDate] = useState("");
+  const [emission, setEmission] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [file, setFile] = useState(null)
+  const [entries, setEntries] = useState([])
+
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) {
+          setPage("login");
+        } else {
+          setPage("home");
+        }
+      } catch (error) {
+        console.error("Ошибка при получении токена:", error);
+        setPage("login");
+      }
+    };
+
+    checkToken();
+  }, []);
+  const logout = () => {
+    setIsAuthenticated(false);
+    AsyncStorage.removeItem('token');
+    AsyncStorage.removeItem('userName');
+    setPage('home')
+  };
+
+  const fetchData = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) return;
+    const response = await axios.get('http://localhost:3000/data', {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+    console.log(response);
+    
+    setEntries(response.data);
+  }
+
+  const addEntry = async () => {
+    if (!date || !emission) return;
+    const formattedDate = new Date(date).toLocaleDateString('ru-RU');
+    const token =await AsyncStorage.getItem('token');
+    await axios.post('http://localhost:3000/data', 
+        { date: formattedDate, emission: parseFloat(emission) }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setDate('');
+    setEmission('');
+    fetchData();  
+  };
+
+  const handleFileUpload = (event : any) => {
+    setFile(event.target.files[0]);
+  }
+
+  const uploadData = async (file: any) => {
+    if (!file) {
+        alert('Пожалуйста, выберите файл');
+        return;
+    }
+
+    const token =await AsyncStorage.getItem('token');
+    console.log(token);
+    
+    try {
+        await axios.post('http://localhost:3000/upload', file, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: `Bearer ${token}`
+            }
+        });
+        alert('Данные выбросов успешно загружены');
+        fetchData();
+    } catch (error) {
+        alert('Ошибка при загрузке данных выбросов');
+        console.error(error);
+    }
+  }
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
+    <View style={{ flex: 1, backgroundColor: "white" }}>
+      <NativeBaseProvider>
+      {['login', 'reg'].includes(page) ? (page === 'login' ? <Login changePage={setPage}></Login> : <Reg changePage={setPage}></Reg>) : 
+      <div>
+      {isAuthenticated && (
+        <View style={{ position: "absolute", top: 10, left: 10 }}>
+          <Button onPress={logout} colorScheme="red" variant="outline">Выйти</Button>
+        </View>
+      )}
+
+      <Box style={{alignItems: "center", marginTop: 25}}>
+        <Text style={{ fontSize: 22, margin: 10 }}>Углеродный след</Text>
+        {/* Поля ввода */}
+        <TextInput
+          style={styles.input}
+          placeholder="Дата (ГГГГ-ММ-ДД)"
+          value={date}
+          onChangeText={setDate}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <TextInput
+          style={styles.input}
+          placeholder="Выбросы CO₂ (кг)"
+          keyboardType="numeric"
+          value={emission}
+          onChangeText={setEmission}
+        />
+
+        {/* Кнопка добавления */}
+        <Button onPress={addEntry} color="#007bff">Добавить</Button>
+      </Box>
+
+      
+      {/* Загрузка данных */}
+      <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 16 }}>
+        <FileUpload uploadData={uploadData}></FileUpload>
+      </View>
+
+      {/* График выбросов (заглушка) */}
+      <Box style={styles.chartPlaceholder}>
+        <Text style={{fontSize: 22}}>График выбросов</Text>
+        <EmissionsChart entries={entries} />
+        </Box>
+        </div>
+      }
+      </NativeBaseProvider>
+    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  chartPlaceholder: {
+    marginTop: 20,
+    padding: 30,
+    backgroundColor: "#fffff",
+    alignItems: "center",
+    borderRadius: 10,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  navigateButton: {
+    marginTop: 20,
+    padding: 10,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#000",
+    borderRadius: 5,
   },
 });

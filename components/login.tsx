@@ -3,31 +3,35 @@ import React, { useState } from "react";
 import { Box, Button, Input, Text, VStack } from "native-base";
 import { NativeBaseProvider } from 'native-base';
 import { View } from "react-native";
+import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
-const Login = () => {
-
+const Login = ({changePage}: any) => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [message, setMessage] = useState('')
 
     const login = async () => {
         try {
-            const response = await axios.post('/login', {
+            const response = await axios.post('http://localhost:3000/login', {
                 email: email,
                 password: password
             });
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('userName', response.data.userName);
+            AsyncStorage.setItem('token', response.data.token);
+            AsyncStorage.setItem('userName', response.data.userName);
             setMessage('Успешный вход');
-            window.open('/home', '_self')
+            // router.replace("/"); // Переход на главную страницу
+            changePage('home')
+
         } catch (error) {
             setMessage('Ошибка входа');
             console.error(error);
         }
     }
     const goToRegister = () => {
-        window.open('/reg', '_self')
+        // router.push("/(tabs)/reg"); // Переход на главную страницу
+        changePage('reg')
     }
 
     return (
