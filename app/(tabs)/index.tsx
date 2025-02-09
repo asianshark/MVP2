@@ -10,21 +10,23 @@ import EmissionsChart from '@/components/EmissionsChart';
 import FileUpload from '@/components/FileUpload';
 
 export default function HomeScreen() {
-  const [page, setPage] = useState('')
+  const [page, setPage] = useState('login')
   const [date, setDate] = useState("");
   const [emission, setEmission] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [file, setFile] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [entries, setEntries] = useState([])
 
   useEffect(() => {
     const checkToken = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
+        console.log(token);
         if (!token) {
           setPage("login");
+          setIsAuthenticated(false)
         } else {
           setPage("home");
+          setIsAuthenticated(true)
         }
       } catch (error) {
         console.error("Ошибка при получении токена:", error);
@@ -33,7 +35,7 @@ export default function HomeScreen() {
     };
 
     checkToken();
-  }, []);
+  }, [page, isAuthenticated]);
   const logout = () => {
     setIsAuthenticated(false);
     AsyncStorage.removeItem('token');
@@ -67,10 +69,6 @@ export default function HomeScreen() {
     fetchData();  
   };
 
-  const handleFileUpload = (event : any) => {
-    setFile(event.target.files[0]);
-  }
-
   const uploadData = async (file: any) => {
     if (!file) {
         alert('Пожалуйста, выберите файл');
@@ -98,7 +96,7 @@ export default function HomeScreen() {
     <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <NativeBaseProvider>
-      {['login', 'reg'].includes(page) ? (page === 'login' ? <Login changePage={setPage}></Login> : <Reg changePage={setPage}></Reg>) : 
+      {!isAuthenticated ? (page === 'login' ? <Login changePage={setPage}></Login> : <Reg changePage={setPage}></Reg>) : 
       <div>
       {isAuthenticated && (
         <View style={{ position: "absolute", top: 10, left: 10 }}>
