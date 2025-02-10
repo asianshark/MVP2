@@ -76,7 +76,6 @@ export default function HomeScreen() {
     }
 
     const token =await AsyncStorage.getItem('token');
-    console.log(token);
     
     try {
         await axios.post('http://localhost:3000/upload', file, {
@@ -135,8 +134,8 @@ export default function HomeScreen() {
       <Box style={styles.chartPlaceholder}>
         <Text style={{fontSize: 22}}>График выбросов</Text>
         <EmissionsChart entries={entries} />
-        </Box>
-        </div>
+      </Box>
+      </div>
       }
       </NativeBaseProvider>
     </View>

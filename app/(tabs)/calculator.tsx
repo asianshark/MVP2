@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Input, Text, VStack, HStack, Center, NativeBaseProvider } from "native-base";
+import { Box, Button, Input, Text, VStack, HStack, Center, NativeBaseProvider, Flex } from "native-base";
 import { View, ScrollView} from "react-native"
 import { TouchableOpacity } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
@@ -19,37 +19,37 @@ const Calculator = () => {
   const [treesToPlant, setTreesToPlant] = useState<number>(0)
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [openRes, setOpenRes] = useState(false)
-  useEffect(() => {
-    const checkToken = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        console.log(token);
-        if (!token) {
-          setPage("login");
-          setIsAuthenticated(false)
-        } else {
-          setPage("home");
-          setIsAuthenticated(true)
-        }
-      } catch (error) {
-        console.error("Ошибка при получении токена:", error);
-        setPage("login");
-      }
-    };
-    checkToken();
+    useEffect(() => {
+        const checkToken = async () => {
+            try {
+                const token = await AsyncStorage.getItem("token");
+                console.log(token);
+                if (!token) {
+                setPage("login");
+                setIsAuthenticated(false)
+                } else {
+                setPage("home");
+                setIsAuthenticated(true)
+                }
+            } catch (error) {
+                console.error("Ошибка при получении токена:", error);
+                setPage("login");
+            }
+        };
+        checkToken();
     }, [page, isAuthenticated]);
     const logout = () => {
         setIsAuthenticated(false);
         AsyncStorage.removeItem('token');
         AsyncStorage.removeItem('userName');
         setPage('home')
-      };
-  const calculateCarbonFootprint = async () => {
-    let transportCarbon = +transport * 0.167;
-    let energyCarbon = +energy * 0.1829;
-    let waterCarbon = +water * 0.92;
-    setEmission(transportCarbon + energyCarbon + waterCarbon);
-    sendDataToServer();
+    };
+    const calculateCarbonFootprint = async () => {
+        let transportCarbon = +transport * 0.167;
+        let energyCarbon = +energy * 0.1829;
+        let waterCarbon = +water * 0.92;
+        setEmission(transportCarbon + energyCarbon + waterCarbon);
+        sendDataToServer();
     }
     useEffect(()=>{
         if(emission > 0){
@@ -92,27 +92,32 @@ const Calculator = () => {
     }
 
     const token = await AsyncStorage.getItem('token');
-    console.log(token);
     
     try {
-        const response = await axios.post('http://localhost:3000/upload-carbon-footprint', file, {
+        await axios.post('http://localhost:3000/upload-carbon-footprint', file, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 Authorization: `Bearer ${token}`
             }
+        }).then((response)=>{
+            setTransport(response.data.transport || '');
+            setEnergy(response.data.energy || '');
+            setWater(response.data.water || '');
+            if (transport && energy && water) {
+                calculateCarbonFootprint();
+            }
+            alert('Данные успешно загружены и расчёт проведён!');
         });
-
-        setTransport(response.data.transport || '');
-        setEnergy(response.data.energy || '');
-        setWater(response.data.water || '');
-        if (transport && energy && water) {
-            calculateCarbonFootprint();
-        }
-        alert('Данные успешно загружены и расчёт проведён!');
     } catch (error) {
         alert('Ошибка при загрузке данных выбросов');
         console.error(error);
     }
+  }
+  const clearCalculator = () =>{
+    setTransport('')
+    setEnergy('')
+    setWater('')
+    setEmission(0);
   }
   return (
       <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
@@ -131,7 +136,13 @@ const Calculator = () => {
                         <Input placeholder="Км на бензине" keyboardType="numeric" value={transport} onChangeText={setTransport} />
                         <Input placeholder="Природный газ (кВт⋅ч)" keyboardType="numeric" value={energy} onChangeText={setEnergy} />
                         <Input placeholder="Электроэнергия (кВт⋅ч)" keyboardType="numeric" value={water} onChangeText={setWater} />
-                        <Button onPress={calculateCarbonFootprint}>Рассчитать</Button>
+                        <HStack space={2} width="100%" justifyContent="center">
+                            {openRes && (
+                                <Button onPress={clearCalculator} flex={1} colorScheme="warning" variant="subtle">Очистить</Button>
+
+                            )}    
+                            <Button flex={1} onPress={calculateCarbonFootprint}>Рассчитать</Button>
+                        </HStack>
                         {openRes ? 
                         <Box p={4} bg="gray.100" borderRadius="md" shadow={2}>
                             <Text fontSize="lg" fontWeight="bold">
@@ -152,7 +163,7 @@ const Calculator = () => {
                             {file && <Text>{file.name}</Text>}
                         </HStack> */}
                         <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 16 }}>
-                                <FileUpload uploadData={handleFileUpload}></FileUpload>
+                            <FileUpload uploadData={handleFileUpload}></FileUpload>
                         </View>
                     </VStack>
                     </div>
