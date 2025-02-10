@@ -104,7 +104,7 @@ export default function HomeScreen() {
         </View>
       )}
 
-      <Box style={{alignItems: "center", marginTop: 25}}>
+      <Box style={{alignItems: "center", marginTop: 25, padding: 10}}>
         <Text style={{ fontSize: 22, margin: 10 }}>Углеродный след</Text>
         {/* Поля ввода */}
         <TextInput

@@ -152,4 +152,4 @@ app.post('/upload-carbon-footprint', authMiddleware, upload.single('file'), (req
     });
 });
 
-app.listen(3000, () => console.log('🚀 Сервер запущен на порту 3000'));
+app.listen(3000, "0.0.0.0", () => console.log('🚀 Сервер запущен на порту 3000'));
