@@ -152,4 +152,9 @@ app.post('/upload-carbon-footprint', authMiddleware, upload.single('file'), (req
     });
 });
 
+app.get('/prifile', authMiddleware, async (req, res) => {
+    const user = User.find({userId: req.user.userId})
+    res.send(user)
+})
+
 app.listen(3000, "0.0.0.0", () => console.log('🚀 Сервер запущен на порту 3000'));

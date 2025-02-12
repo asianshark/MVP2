@@ -22,7 +22,7 @@ export default function HomeScreen() {
         const token = await AsyncStorage.getItem("token");
         console.log(token);
         if (!token) {
-          setPage("login");
+          if(page == 'home') setPage("login");
           setIsAuthenticated(false)
         } else {
           setPage("home");
@@ -95,7 +95,7 @@ export default function HomeScreen() {
     <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <NativeBaseProvider>
-      {!isAuthenticated ? (page === 'login' ? <Login changePage={setPage}></Login> : <Reg changePage={setPage}></Reg>) : 
+      {!isAuthenticated ? (page == 'login' ? <Login changePage={setPage}></Login> : <Reg changePage={setPage}></Reg>) : 
       <div>
       {isAuthenticated && (
         <View style={{ position: "absolute", top: 10, left: 10 }}>
