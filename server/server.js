@@ -178,4 +178,33 @@ app.post('/upload-carbon-footprint', authMiddleware, usageMiddleware, upload.sin
     });
 });
 
+app.get('/profile', authMiddleware, async (req, res) => {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+        return res.status(404).json({ message: 'Пользователь не найден' });
+    }
+    res.json({ name: user.name, email: user.email, dailyUsage: user.dailyUsage, lastUsageReset: user.lastUsageReset, subscription: user.subscription, subscriptionExpires: user.subscriptionExpires });
+});
+
+app.post('/subscribe', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId);
+        if (!user) return res.status(404).json({ message: "Пользователь не найден" });
+
+        user.subscription = true;
+        user.subscriptionExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // +30 дней
+        await user.save();
+
+        res.json({ success: true, subscriptionExpires: user.subscriptionExpires });
+    } catch (error) {
+        console.error("Ошибка подписки:", error);
+        res.status(500).json({ message: "Ошибка при оформлении подписки" });
+    }
+});
+=======
+app.get('/prifile', authMiddleware, async (req, res) => {
+    const user = User.find({userId: req.user.userId})
+    res.send(user)
+})
+
 app.listen(3000, "0.0.0.0", () => console.log('🚀 Сервер запущен на порту 3000'));
