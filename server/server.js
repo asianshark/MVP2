@@ -17,7 +17,11 @@ mongoose.connect('mongodb://localhost:27017/carbon_tracker');
 const User = mongoose.model('User', new mongoose.Schema({
     name: String,
     email: { type: String, unique: true },
-    password: String
+    password: String,
+    subscription: { type: Boolean, default: false },
+    subscriptionExpires: { type: Date, default: null },
+    dailyUsage: { type: Number, default: 0 },
+    lastUsageReset: { type: Date, default: new Date() }
 }), 'User');
 
 const Carbon = mongoose.model('Carbon', new mongoose.Schema({
@@ -28,6 +32,28 @@ const Carbon = mongoose.model('Carbon', new mongoose.Schema({
     water: Number,
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }), 'Carbon');
+
+const resetDailyLimit = async (user) => {
+    const now = new Date();
+    if (!user.lastUsageReset || new Date(user.lastUsageReset).toDateString() !== now.toDateString()) {
+        user.dailyUsage = 0;
+        user.lastUsageReset = now;
+        await user.save();
+    }
+};
+
+const usageMiddleware = async (req, res, next) => {
+    const user = await User.findById(req.user.userId);
+    await resetDailyLimit(user);
+
+    if (!user.subscription && user.dailyUsage >= 5) {
+        return res.status(403).json({ message: 'Лимит использования исчерпан. Попробуйте завтра или оформите подписку.' });
+    }
+
+    user.dailyUsage += 1;
+    await user.save();
+    next();
+};
 
 app.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
@@ -75,7 +101,7 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-app.get('/data', authMiddleware, async (req, res) => {
+app.get('/data', authMiddleware, usageMiddleware, async (req, res) => {
     const data = await Carbon.find({ userId: req.user.userId });
     res.json(data);
 });
@@ -129,7 +155,7 @@ app.post('/upload', authMiddleware, upload.single('file'), (req, res) => {
     });
 });
 
-app.post('/upload-carbon-footprint', authMiddleware, upload.single('file'), (req, res) => {
+app.post('/upload-carbon-footprint', authMiddleware, usageMiddleware, upload.single('file'), (req, res) => {
     const filePath = req.file.path;
 
     fs.readFile(filePath, 'utf8', async (err, data) => {
@@ -151,10 +177,5 @@ app.post('/upload-carbon-footprint', authMiddleware, upload.single('file'), (req
         }
     });
 });
-
-app.get('/prifile', authMiddleware, async (req, res) => {
-    const user = User.find({userId: req.user.userId})
-    res.send(user)
-})
 
 app.listen(3000, "0.0.0.0", () => console.log('🚀 Сервер запущен на порту 3000'));
