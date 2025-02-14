@@ -201,7 +201,7 @@ app.post('/subscribe', authMiddleware, async (req, res) => {
         res.status(500).json({ message: "Ошибка при оформлении подписки" });
     }
 });
-=======
+
 app.get('/prifile', authMiddleware, async (req, res) => {
     const user = User.find({userId: req.user.userId})
     res.send(user)
