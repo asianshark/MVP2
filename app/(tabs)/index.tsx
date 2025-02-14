@@ -1,13 +1,16 @@
 import Login from '@/components/login';
 import Reg from '@/components/reg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View,StyleSheet, Text, TextInput, ScrollView} from "react-native";
 import { Box, NativeBaseProvider, Button } from "native-base";
 import axios from 'axios';
 import EmissionsChart from '@/components/EmissionsChart';
 import FileUpload from '@/components/FileUpload';
+import ReloadIcon from '@/components/ReloadIcon';
+import LoadingIcon from '@/components/LoadingIcon';
+import _ from "lodash";
+
 
 export default function HomeScreen() {
   const [page, setPage] = useState('login')
@@ -15,6 +18,7 @@ export default function HomeScreen() {
   const [emission, setEmission] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [entries, setEntries] = useState([])
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   useEffect(() => {
     const checkToken = async () => {
@@ -22,7 +26,7 @@ export default function HomeScreen() {
         const token = await AsyncStorage.getItem("token");
         console.log(token);
         if (!token) {
-          setPage("login");
+          if(page == 'home') setPage("login");
           setIsAuthenticated(false)
         } else {
           setPage("home");
@@ -36,6 +40,9 @@ export default function HomeScreen() {
 
     checkToken();
   }, [page, isAuthenticated]);
+  useEffect(()=>{
+    fetchData()
+  },[])
   const logout = () => {
     setIsAuthenticated(false);
     AsyncStorage.removeItem('token');
@@ -43,18 +50,32 @@ export default function HomeScreen() {
     setPage('home')
   };
 
-  const fetchData = async () => {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) return;
-    const response = await axios.get('http://localhost:3000/data', {
-        headers: {
-            Authorization: `Bearer ${token}`
+  const fetchData = useCallback(
+    _.throttle(async () => {
+      setIsLoading(true);
+
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) {
+          console.warn("No token found");
+          setIsLoading(false);
+          setPage('home')
+          return;
         }
-    });
-    console.log(response);
-    
-    setEntries(response.data);
-  }
+
+        const response = await axios.get("http://localhost:3000/data", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setEntries(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false)
+      }
+    }, 2000), // Функция вызывается не чаще, чем раз в 3 секунд
+    []
+  );
 
   const addEntry = async () => {
     if (!date || !emission) return;
@@ -95,7 +116,7 @@ export default function HomeScreen() {
     <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <NativeBaseProvider>
-      {!isAuthenticated ? (page === 'login' ? <Login changePage={setPage}></Login> : <Reg changePage={setPage}></Reg>) : 
+      {!isAuthenticated ? (page == 'login' ? <Login changePage={setPage}></Login> : <Reg changePage={setPage}></Reg>) : 
       <div>
       {isAuthenticated && (
         <View style={{ position: "absolute", top: 10, left: 10 }}>
@@ -132,8 +153,8 @@ export default function HomeScreen() {
 
       {/* График выбросов (заглушка) */}
       <Box style={styles.chartPlaceholder}>
-        <Text style={{fontSize: 22}}>График выбросов</Text>
-        <EmissionsChart entries={entries} />
+        <Text style={{fontSize: 22}}>График выбросов {!isLoading ? <ReloadIcon onPress={fetchData}></ReloadIcon> : <LoadingIcon></LoadingIcon>}</Text>
+        {!isLoading ? <EmissionsChart entries={entries} /> : <Text style={{fontSize: 20}}>Loading ...</Text>}
       </Box>
       </div>
       }

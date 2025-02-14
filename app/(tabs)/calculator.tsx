@@ -49,12 +49,12 @@ const Calculator = () => {
         let energyCarbon = +energy * 0.1829;
         let waterCarbon = +water * 0.92;
         setEmission(transportCarbon + energyCarbon + waterCarbon);
-        sendDataToServer();
     }
     useEffect(()=>{
         if(emission > 0){
             setTreesToPlant(Math.ceil(emission / 22));
             setOpenRes(true)
+            sendDataToServer()
         }else{
             setTreesToPlant(0)
             setOpenRes(false)
