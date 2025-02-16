@@ -4,6 +4,7 @@ import axios from "axios";
 import { router } from "expo-router";
 import { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_HOST } from "@/constants/API_HOST";
 
 const Reg = ({changePage}: any) => {
     const [email, setEmail] = useState('')
@@ -13,7 +14,7 @@ const Reg = ({changePage}: any) => {
 
     const register = async () => {
         try {
-            const response = await axios.post('http://localhost:3000/register', {
+            const response = await axios.post(API_HOST+'/register', {
                 name: name,
                 email: email,
                 password: password

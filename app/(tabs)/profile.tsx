@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { NativeBaseProvider, Box, Button } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { API_HOST } from '@/constants/API_HOST';
 
 export default function ProfileScreen() {
     const [user, setUser] = useState({ name: '', email: '', subscription: false, subscriptionExpires: 2025-12-24, dailyUsage: 0, lastUsageReset: 2025-2-13 });
@@ -14,7 +15,7 @@ export default function ProfileScreen() {
                 return;
             }
     
-            const response = await axios.post('http://localhost:3000/subscribe', {}, {
+            const response = await axios.post(API_HOST+'/subscribe', {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
     
@@ -36,7 +37,7 @@ export default function ProfileScreen() {
             if (!token) return;
             
             try {
-                const response = await axios.get('http://localhost:3000/profile', {
+                const response = await axios.get(API_HOST+'/profile', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setUser(response.data);
@@ -47,7 +48,6 @@ export default function ProfileScreen() {
         
         fetchUserData();
     }, []);
-
     return (
         <ScrollView style={{ flex: 1, backgroundColor: 'white' }}>
             <View style={{ flex: 1, backgroundColor: 'white' }}>

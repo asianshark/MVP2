@@ -5,6 +5,7 @@ import { NativeBaseProvider } from 'native-base';
 import { View } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_HOST } from "@/constants/API_HOST";
 
 
 const Login = ({changePage}: any) => {
@@ -14,7 +15,7 @@ const Login = ({changePage}: any) => {
 
     const login = async () => {
         try {
-            const response = await axios.post('http://localhost:3000/login', {
+            const response = await axios.post(API_HOST+'/login', {
                 email: email,
                 password: password
             });

@@ -10,6 +10,7 @@ import FileUpload from '@/components/FileUpload';
 import ReloadIcon from '@/components/ReloadIcon';
 import LoadingIcon from '@/components/LoadingIcon';
 import _ from "lodash";
+import { API_HOST } from '@/constants/API_HOST';
 
 
 export default function HomeScreen() {
@@ -41,6 +42,8 @@ export default function HomeScreen() {
     checkToken();
   }, [page, isAuthenticated]);
   useEffect(()=>{
+    console.log(API_HOST);
+    
     fetchData()
   },[])
   const logout = () => {
@@ -63,7 +66,7 @@ export default function HomeScreen() {
           return;
         }
 
-        const response = await axios.get("http://localhost:3000/data", {
+        const response = await axios.get(`${API_HOST}/data`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -81,7 +84,7 @@ export default function HomeScreen() {
     if (!date || !emission) return;
     const formattedDate = new Date(date).toLocaleDateString('ru-RU');
     const token =await AsyncStorage.getItem('token');
-    await axios.post('http://localhost:3000/data', 
+    await axios.post(API_HOST+'/data', 
         { date: formattedDate, emission: parseFloat(emission) }, 
         { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -99,7 +102,7 @@ export default function HomeScreen() {
     const token =await AsyncStorage.getItem('token');
     
     try {
-        await axios.post('http://localhost:3000/upload', file, {
+        await axios.post(API_HOST+'/upload', file, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 Authorization: `Bearer ${token}`

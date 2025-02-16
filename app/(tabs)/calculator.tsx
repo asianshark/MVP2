@@ -8,6 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import Login from "@/components/login";
 import Reg from "@/components/reg";
+import { API_HOST } from "@/constants/API_HOST";
 
 const Calculator = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -76,7 +77,7 @@ const Calculator = () => {
         }
 
         try {
-            await axios.post('http://localhost:3000/data', data, {
+            await axios.post(API_HOST+'/data', data, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
         } catch (error) {
@@ -94,7 +95,7 @@ const Calculator = () => {
     const token = await AsyncStorage.getItem('token');
     
     try {
-        await axios.post('http://localhost:3000/upload-carbon-footprint', file, {
+        await axios.post(API_HOST+'/upload-carbon-footprint', file, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 Authorization: `Bearer ${token}`
