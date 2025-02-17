@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import Chart, { ChartConfiguration, ChartData } from "chart.js/auto";
+import Chart, { ChartConfiguration } from "chart.js/auto";
 
 interface EmissionEntry {
   date: string; // Дата выбросов (формат YYYY-MM-DD)
@@ -32,7 +32,7 @@ export const useChart = ({ entries }: UseChartProps) => {
 
     // Формируем данные для графика
     const labels = sortedEntries.map((entry) =>
-      new Date(entry.date).toLocaleDateString("ru-RU")
+      entry.date
     );
     const dataValues = sortedEntries.map((entry) => entry.emission);
 

@@ -9,6 +9,7 @@ import axios from "axios";
 import Login from "@/components/login";
 import Reg from "@/components/reg";
 import { API_HOST } from "@/constants/API_HOST";
+import { getRecomendation } from "@/hooks/getRecomends";
 
 const Calculator = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -20,6 +21,7 @@ const Calculator = () => {
   const [treesToPlant, setTreesToPlant] = useState<number>(0)
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [openRes, setOpenRes] = useState(false)
+  const [recomends, setRecomends] = useState<{title: string, regs: string[]}>()
     useEffect(() => {
         const checkToken = async () => {
             try {
@@ -49,6 +51,7 @@ const Calculator = () => {
         let transportCarbon = +transport * 0.167;
         let energyCarbon = +energy * 0.1829;
         let waterCarbon = +water * 0.92;
+        setRecomends(getRecomendation({transportCarbon, energyCarbon, waterCarbon}))
         setEmission(transportCarbon + energyCarbon + waterCarbon);
     }
     useEffect(()=>{
@@ -155,6 +158,14 @@ const Calculator = () => {
                             <VStack mt={2} space={2}>
                                 <Text>• Посадить {treesToPlant.toString()} дерева для компенсации.</Text>
                                 <Text>• Поддержать проекты по возобновляемым источникам энергии.</Text>
+                            </VStack>
+                            <Text mt={2} fontSize="md">
+                                Мы заметили что у вас высокий показатель {recomends?.title}. Ниже предоставлены советы по уменшению данного показателя:
+                            </Text>
+                            <VStack mt={2} space={2}>
+                                {recomends?.regs.map((item, index) => (
+                                    <Text key={index}>• {item}</Text>
+                                ))}
                             </VStack>
                         </Box> : ''
                         }
