@@ -126,8 +126,7 @@ const Calculator = () => {
   return (
       <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
         <View style={{ flex: 1, backgroundColor: "white" }}>
-            <NativeBaseProvider>
-                <Center flex={1} bg="white" p={5}>
+            <NativeBaseProvider>\
                     {!isAuthenticated ? (page === 'login' ? <Login changePage={setPage}></Login> : <Reg changePage={setPage}></Reg>) : 
                     <div>
                     {isAuthenticated && (
@@ -135,12 +134,12 @@ const Calculator = () => {
                         <Button onPress={logout} colorScheme="red" variant="outline">Выйти</Button>
                         </View>
                     )}
-                    <VStack space={4} width="100%" marginTop="6">
+                    <VStack space={4} alignItems='center' marginTop="6">
                         <Text fontSize="xl" textAlign="center" marginY="2">Расчет углеродного следа</Text>
                         <Input placeholder="Км на бензине" keyboardType="numeric" value={transport} onChangeText={setTransport} />
                         <Input placeholder="Природный газ (кВт⋅ч)" keyboardType="numeric" value={energy} onChangeText={setEnergy} />
                         <Input placeholder="Электроэнергия (кВт⋅ч)" keyboardType="numeric" value={water} onChangeText={setWater} />
-                        <HStack space={2} width="100%" justifyContent="center">
+                        <HStack space={2} justifyContent="center">
                             {openRes && (
                                 <Button onPress={clearCalculator} flex={1} colorScheme="warning" variant="subtle">Очистить</Button>
 
@@ -180,7 +179,6 @@ const Calculator = () => {
                     </VStack>
                     </div>
                     }
-                </Center>
             </NativeBaseProvider>
         </View>
     </ScrollView>

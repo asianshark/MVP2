@@ -4,6 +4,8 @@ import { NativeBaseProvider, Box, Button } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_HOST } from '@/constants/API_HOST';
+import Login from '@/components/login';
+import Reg from '@/components/reg';
 
 export default function ProfileScreen() {
     const [user, setUser] = useState({ name: '', email: '', subscription: false, subscriptionExpires: 2025-12-24, dailyUsage: 0, lastUsageReset: 2025-2-13 });
@@ -48,28 +50,67 @@ export default function ProfileScreen() {
         
         fetchUserData();
     }, []);
+    const [page, setPage] = useState('login')
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+    useEffect(() => {
+      const checkToken = async () => {
+        try {
+          const token = await AsyncStorage.getItem("token");
+          console.log(token);
+          if (!token) {
+            if(page == 'home') setPage("login");
+            setIsAuthenticated(false)
+          } else {
+            setPage("home");
+            setIsAuthenticated(true)
+          }
+        } catch (error) {
+          console.error("Ошибка при получении токена:", error);
+          setPage("login");
+        }
+      };
+  
+      checkToken();
+    }, [page, isAuthenticated]);
+    const logout = () => {
+      setIsAuthenticated(false);
+      AsyncStorage.removeItem('token');
+      AsyncStorage.removeItem('userName');
+      setPage('home')
+    };
+  
     return (
         <ScrollView style={{ flex: 1, backgroundColor: 'white' }}>
             <View style={{ flex: 1, backgroundColor: 'white' }}>
                 <NativeBaseProvider>
-                    <Box style={styles.container}>
-                        <Text style={styles.title}>Профиль</Text>
-                        <Text style={styles.label}>Имя:</Text>
-                        <Text style={styles.text}>{user.name}</Text>
-                        <Text style={styles.label}>Email:</Text>
-                        <Text style={styles.text}>{user.email}</Text>
-                        <Text style={styles.label}>Подписка:</Text>
-                        {user.subscription ? (
-                            <Text style={styles.text}>Активна до {new Date(user.subscriptionExpires).toLocaleDateString()}</Text>
-                        ) : (
-                            <>
-                                <Text style={styles.text}>Нет подписки</Text>
-                                <Text style={styles.text}>Осталось попыток: {5 - user.dailyUsage}</Text>
-                                <Text style={styles.text}>Обновление лимита: {new Date(user.lastUsageReset).toLocaleTimeString()}</Text>
-                                <Button onPress={handleSubscription}>Оформить подписку на месяц</Button>
-                            </>
-                        )}
-                    </Box>
+                {!isAuthenticated ? (page == 'login' ? <Login changePage={setPage}></Login> : <Reg changePage={setPage}></Reg>) : 
+                    <div>
+                    {isAuthenticated && (
+                        <View style={{ position: "absolute", top: 10, left: 10 }}>
+                        <Button onPress={logout} colorScheme="red" variant="outline">Выйти</Button>
+                        </View>
+                    )}
+                        <Box style={styles.container}>
+                            <Text style={styles.title}>Профиль</Text>
+                            <Text style={styles.label}>Имя:</Text>
+                            <Text style={styles.text}>{user.name}</Text>
+                            <Text style={styles.label}>Email:</Text>
+                            <Text style={styles.text}>{user.email}</Text>
+                            <Text style={styles.label}>Подписка:</Text>
+                            {user.subscription ? (
+                                <Text style={styles.text}>Активна до {new Date(user.subscriptionExpires).toLocaleDateString()}</Text>
+                            ) : (
+                                <>
+                                    <Text style={styles.text}>Нет подписки</Text>
+                                    <Text style={styles.text}>Осталось попыток: {5 - user.dailyUsage}</Text>
+                                    <Text style={styles.text}>Обновление лимита: {new Date(user.lastUsageReset).toLocaleTimeString()}</Text>
+                                    <Button onPress={handleSubscription}>Оформить подписку на месяц</Button>
+                                </>
+                            )}
+                        </Box>
+                    </div>
+                    }
                 </NativeBaseProvider>
             </View>
         </ScrollView>

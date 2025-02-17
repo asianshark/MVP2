@@ -42,8 +42,6 @@ export default function HomeScreen() {
     checkToken();
   }, [page, isAuthenticated]);
   useEffect(()=>{
-    console.log(API_HOST);
-    
     fetchData()
   },[])
   const logout = () => {
