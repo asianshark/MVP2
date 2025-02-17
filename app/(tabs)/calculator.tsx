@@ -128,7 +128,7 @@ const Calculator = () => {
         <View style={{ flex: 1, backgroundColor: "white" }}>
             <NativeBaseProvider>\
                     {!isAuthenticated ? (page === 'login' ? <Login changePage={setPage}></Login> : <Reg changePage={setPage}></Reg>) : 
-                    <div>
+                    <Box>
                     {isAuthenticated && (
                         <View style={{ position: "absolute", top: 10, left: 10 }}>
                         <Button onPress={logout} colorScheme="red" variant="outline">Выйти</Button>
@@ -177,7 +177,7 @@ const Calculator = () => {
                             <FileUpload uploadData={handleFileUpload}></FileUpload>
                         </View>
                     </VStack>
-                    </div>
+                    </Box>
                     }
             </NativeBaseProvider>
         </View>

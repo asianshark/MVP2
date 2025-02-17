@@ -118,7 +118,7 @@ export default function HomeScreen() {
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <NativeBaseProvider>
       {!isAuthenticated ? (page == 'login' ? <Login changePage={setPage}></Login> : <Reg changePage={setPage}></Reg>) : 
-      <div>
+      <Box>
       {isAuthenticated && (
         <View style={{ position: "absolute", top: 10, left: 10 }}>
           <Button onPress={logout} colorScheme="red" variant="outline">Выйти</Button>
@@ -157,7 +157,7 @@ export default function HomeScreen() {
         <Text style={{fontSize: 22}}>График выбросов {!isLoading ? <ReloadIcon onPress={fetchData}></ReloadIcon> : <LoadingIcon></LoadingIcon>}</Text>
         {!isLoading ? <EmissionsChart entries={entries} /> : <Text style={{fontSize: 20}}>Loading ...</Text>}
       </Box>
-      </div>
+      </Box>
       }
       </NativeBaseProvider>
     </View>

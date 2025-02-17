@@ -102,7 +102,7 @@ const authMiddleware = (req, res, next) => {
 };
 
 app.get('/data', authMiddleware, usageMiddleware, async (req, res) => {
-    const data = await Carbon.find({ userId: req.user.userId });
+    const data = await Carbon.find({ userId: req.user.userId }).sort({ createdAt: -1 }).limit(30);
     res.json(data);
 });
 
